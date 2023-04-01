@@ -31,7 +31,6 @@ export function renderLoginComponent({ appElement, setToken, fetchTodosAndRender
                 login: 'admin',
                 password: 'admin',
             }).then((user) => {
-                console.log(user);
                 setToken(`Bearer ${user.user.token}`);
                 fetchTodosAndRender();
             });
