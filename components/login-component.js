@@ -1,17 +1,26 @@
 import { loginUser } from '../api.js';
 
 export function renderLoginComponent({ appElement, setToken, fetchTodosAndRender }) {
-    const appHtml = `
+    let isLoginMode = false;
+    
+    const renderForm = () => {
+        const appHtml = `
             <div class="form">
-                <h3 class="form-title">Форма добавления</h3>
+                <h3 class="form-title">Форма ${isLoginMode ? 'входа' : 'регистрации'}</h3>
                 <div class="form-row">
+                    ${isLoginMode ? '' : `Имя
+                    <input 
+                    type="text" 
+                    id="name-input" 
+                    class="input" />
+                    `}
+                    
                     Логин
                     <input 
                     type="text" 
                     id="login-input" 
                     class="input" />
-                </div>
-                <div class="form-row">
+
                     Пароль
                     <input 
                     type="password" 
@@ -19,14 +28,16 @@ export function renderLoginComponent({ appElement, setToken, fetchTodosAndRender
                     class="input" />
                 </div>
                 <br />
-                <button class="button" id="login-button">Войти</button>
+                <button class="button" id="login-button">${isLoginMode ? 'Войти' : 'Зарегистрироваться'}</button>
+                <br />
+                <br />
+                <button class="button" id="toggle-button">Перейти ${isLoginMode ? 'к регистрации' : 'ко входу'}</button>
             </div>
             `
 
     appElement.innerHTML = appHtml;
 
-    const loginButtonElement = document.getElementById('login-button');
-    loginButtonElement.addEventListener('click', () => {
+    document.getElementById('login-button').addEventListener('click', () => {
         const login = document.getElementById('login-input').value;
         const password = document.getElementById('password-input').value;
 
@@ -50,4 +61,12 @@ export function renderLoginComponent({ appElement, setToken, fetchTodosAndRender
             alert(error.message);
         });
     })
+
+    document.getElementById('toggle-button').addEventListener('click', () => {
+        isLoginMode = !isLoginMode;
+        renderForm();
+    })
+    }
+
+    renderForm();
 }
