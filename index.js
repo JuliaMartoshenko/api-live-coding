@@ -1,36 +1,22 @@
+import { deleteTodo, getTodos, postTodo } from "./api.js";
+
 let tasks = [];
 
-    let token = null;
+let token = null;
 
-    const host = "https://webdev-hw-api.vercel.app/api/v2/todos";
+const fetchTodosAndRender = () => {
+    return getTodos({ token })
+        .then((responseData) => {
+            tasks = responseData.todos;
+            renderApp();
+        });
+};
 
-    const fetchTodosAndRender = () => {
-        return fetch(host, {
-            method: "GET",
-            headers: {
-                Authorization: token,
-            },
-        })
-            .then((response) => {
-                if (response.status === 401) {
-                    // token = prompt("Введите верный пароль");
-                    // fetchTodosAndRender();
-                    throw new Error("Нет авторизации");
-                }
+const renderApp = () => {
+    const appElement = document.getElementById('app');
 
-                return response.json();
-            })
-            .then((responseData) => {
-                tasks = responseData.todos;
-                renderApp();
-            });
-    };
-
-    const renderApp = () => {
-        const appElement = document.getElementById('app');
-
-        if (!token) {
-            const appHtml = `
+    if (!token) {
+        const appHtml = `
             <div class="form">
                 <h3 class="form-title">Форма добавления</h3>
                 <div class="form-row">
@@ -52,30 +38,30 @@ let tasks = [];
             </div>
             `
 
-            appElement.innerHTML = appHtml;
+        appElement.innerHTML = appHtml;
 
-            const loginButtonElement = document.getElementById('login-button');
-            loginButtonElement.addEventListener('click', () => {
-                token = "Bearer asb4c4boc86gasb4c4boc86g37w3cc3bo3b83k4g37k3bk3cg3c03ck4k";
-                fetchTodosAndRender();
-            })
-            
-            return;
-        }
+        const loginButtonElement = document.getElementById('login-button');
+        loginButtonElement.addEventListener('click', () => {
+            token = "Bearer asb4c4boc86gasb4c4boc86g37w3cc3bo3b83k4g37k3bk3cg3c03ck4k";
+            fetchTodosAndRender();
+        })
 
-        const tasksHtml = tasks
-            .map((task) => {
-                return `
+        return;
+    }
+
+    const tasksHtml = tasks
+        .map((task) => {
+            return `
           <li class="task">
             <p class="task-text">
               ${task.text}
               <button data-id="${task.id}" class="button delete-button">Удалить</button>
             </p>
           </li>`;
-            })
-            .join("");
+        })
+        .join("");
 
-            const appHtml = `
+    const appHtml = `
             <h1>Список задач</h1>
 
             <ul class="tasks" id="list">
@@ -93,38 +79,30 @@ let tasks = [];
             </div>
         `;
 
-        appElement.innerHTML = appHtml;
+    appElement.innerHTML = appHtml;
 
-        const buttonElement = document.getElementById("add-button");
-        const listElement = document.getElementById("list");
-        const textInputElement = document.getElementById("text-input");
+    const buttonElement = document.getElementById("add-button");
+    const listElement = document.getElementById("list");
+    const textInputElement = document.getElementById("text-input");
 
-        const deleteButtons = document.querySelectorAll(".delete-button");
+    const deleteButtons = document.querySelectorAll(".delete-button");
 
-        for (const deleteButton of deleteButtons) {
-            deleteButton.addEventListener("click", (event) => {
-                event.stopPropagation();
+    for (const deleteButton of deleteButtons) {
+        deleteButton.addEventListener("click", (event) => {
+            event.stopPropagation();
 
-                const id = deleteButton.dataset.id;
+            const id = deleteButton.dataset.id;
 
-                // подписываемся на успешное завершение запроса с помощью then
-                fetch("https://webdev-hw-api.vercel.app/api/todos/" + id, {
-                    method: "DELETE",
-                    headers: {
-                        Authorization: token,
-                    },
-                })
-                    .then((response) => {
-                        return response.json();
-                    })
-                    .then((responseData) => {
-                        // получили данные и рендерим их в приложении
-                        tasks = responseData.todos;
-                        renderApp();
-                    });
-            });
-        }
-        buttonElement.addEventListener("click", () => {
+            // подписываемся на успешное завершение запроса с помощью then
+            deleteTodo({ token, id })
+                .then((responseData) => {
+                    // получили данные и рендерим их в приложении
+                    tasks = responseData.todos;
+                    renderApp();
+                });
+        });
+    }
+    buttonElement.addEventListener("click", () => {
         if (textInputElement.value === "") {
             return;
         }
@@ -133,18 +111,7 @@ let tasks = [];
         buttonElement.textContent = "Задача добавляеятся...";
 
         // подписываемся на успешное завершение запроса с помощью then
-        fetch(host, {
-            method: "POST",
-            body: JSON.stringify({
-                text: textInputElement.value,
-            }),
-            headers: {
-                Authorization: token,
-            },
-        })
-            .then((response) => {
-                return response.json();
-            })
+        postTodo({ token, text: textInputElement.value })
             .then(() => {
                 // TODO: кинуть исключение
                 textInputElement.value = "";
@@ -163,7 +130,6 @@ let tasks = [];
                 buttonElement.textContent = "Добавить";
             });
     });
-    };
+};
 
-    //fetchTodosAndRender();
-    renderApp();
+renderApp();
