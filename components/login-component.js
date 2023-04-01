@@ -1,4 +1,4 @@
-import { login } from '../api.js';
+import { loginUser } from '../api.js';
 
 export function renderLoginComponent({ appElement, setToken, fetchTodosAndRender }) {
     const appHtml = `
@@ -14,7 +14,7 @@ export function renderLoginComponent({ appElement, setToken, fetchTodosAndRender
                 <div class="form-row">
                     Пароль
                     <input 
-                    type="text" 
+                    type="password" 
                     id="password-input" 
                     class="input" />
                 </div>
@@ -23,16 +23,31 @@ export function renderLoginComponent({ appElement, setToken, fetchTodosAndRender
             </div>
             `
 
-        appElement.innerHTML = appHtml;
+    appElement.innerHTML = appHtml;
 
-        const loginButtonElement = document.getElementById('login-button');
-        loginButtonElement.addEventListener('click', () => {
-            login({
-                login: 'admin',
-                password: 'admin',
-            }).then((user) => {
-                setToken(`Bearer ${user.user.token}`);
-                fetchTodosAndRender();
-            });
-        })
+    const loginButtonElement = document.getElementById('login-button');
+    loginButtonElement.addEventListener('click', () => {
+        const login = document.getElementById('login-input').value;
+        const password = document.getElementById('password-input').value;
+
+        if (!login) {
+            alert('Введите логин');
+            return;
+        }
+
+        if (!password) {
+            alert('Введите пароль');
+            return;
+        }
+
+        loginUser({
+            login: login,
+            password: password,
+        }).then((user) => {
+            setToken(`Bearer ${user.user.token}`);
+            fetchTodosAndRender();
+        }).catch(error => {
+            alert(error.message);
+        });
+    })
 }
